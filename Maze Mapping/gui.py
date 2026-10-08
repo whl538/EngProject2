@@ -89,11 +89,33 @@ class MazeGUI(tk.Tk):
     def get_intro_tab(self):
         return self.introtab
 
+    def create_grid(self, event=None):
+
+        w = self.c.winfo_width() 
+        h = self.c.winfo_height() 
+        self.c.delete('grid_line') 
+
+        w_divider_frequency = w // self.divisions
+        h_divider_frequency = h // self.divisions
+        
+        for i in range(0, w, w_divider_frequency):
+            self.c.create_line([(i, 0), (i, h)], tag='grid_line')
+        
+        for i in range(0, h, h_divider_frequency):
+            self.c.create_line([(0, i), (w, i)], tag='grid_line')
+
+
     def start_maze(self, x, y, divisions):
+        self.divisions = divisions
         self.maze = Maze(x, y, divisions)
         self.notebook.forget(self.introtab)
 
-        self.tabs.insert(0, tk.Frame(self.notebook))
+        maze_gui = tk.Frame(self.notebook)
+        self.c = tk.Canvas(maze_gui, height=1000, width=1000, bg='white')
+        self.c.pack(fill=tk.BOTH, expand=True)
+        self.c.bind('<Configure>', self.create_grid)
+
+        self.tabs.insert(0, maze_gui)
         self.notebook.add(self.tabs[0], text=f'{x} x {y} maze!')
         self.tabs.append(tk.Frame(self.notebook))
         self.notebook.pack(expand=True, fill='both')

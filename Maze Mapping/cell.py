@@ -38,3 +38,11 @@ class Cell():
             return type(self.node)
         except:
             raise Exception("This Cell does not contain a Node!")
+
+    def __str__(self):
+        return f'''Cell at ({self.x}, {self.y}):\n\tLength: {self.length}\n\tWidth: {self.width}\n\tHas Node: {self.has_node}\n\tNode Type: {self.node_type}'''
+
+if __name__ == "__main__":
+    test_cell = Cell(60, 60, 0, 0)
+
+    print(str(test_cell))
