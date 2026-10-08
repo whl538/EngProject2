@@ -13,6 +13,14 @@ class Node():
         self.value = None
         self.location = (x, y)
 
+    def set_value(self, value):
+            self.value = value
+    
+    def get_value(self):
+        if not self.value:
+            raise ValueError('This Node does not have a value!')
+        return self.value
+
     def get_location(self):
         """Returns the x and y coordinate of the Node as a tuple"""
         return self.location
@@ -30,14 +38,6 @@ class BranchNode(Node):
         super().__init__(id, x, y)
         self.calculated = False
         self.distance_from_parent = distance
-
-    def set_value(self, value):
-        self.value = value
-
-    def get_value(self):
-        if not self.value:
-            raise ValueError('This Node does not have a value!')
-        return self.value
 
     def get_distance_from_parent(self):
         return self.distance_from_parent
@@ -59,6 +59,9 @@ class BranchNode(Node):
 
     def is_calculated(self):
         return self.calculated
+
+    def __str__(self):
+        return f'''Branch Node {self.id}:\n\tLocation: {self.location}\n\tCalculated: {self.calculated}'''
 
 class EndPointNode(BranchNode):
     """End Point Nodes are Nodes with either a parent or at least one child, but not both"""
@@ -85,4 +88,13 @@ class EndPointNode(BranchNode):
 
     def is_end(self):
         return self.end
-        
+
+    def __str__(self):
+        return f'''End Point Node {self.id}:\n\tStart: {self.start}\n\t End: {self.end}'''
+
+if __name__ == "__main__":
+    test_branch = BranchNode(1, 0, 0, 5)
+    test_end = EndPointNode(2, 0, 1)
+
+    print(str(test_branch))
+    print(str(test_end))
