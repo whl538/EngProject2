@@ -10,7 +10,7 @@ import rotaryio
 from adafruit_motor import motor
 
 class EncoderMotor():
-    def __init__(self, standby_pin, pwm_gate,
+    def __init__(self, pwm_gate,
                  pwm_in1, pwm_in2,
                  enc_pin1=None, enc_pin2=None,
                  pulse_frequency=20000):
@@ -18,7 +18,6 @@ class EncoderMotor():
         Initialises an EncoderMotor object. 
 
         Required Parameters:
-          `standby_pin` (pin): Standby pin on the motor driver.
           `pwm_gate` (pin): PWMA/B pin on the motor driver (acts as a master gate).
           `pwm_in1` (pin): A/BIN1 pin on the motor driver.
           `pwm_in2` (pin): A/BIN2 pin on the motor driver.
@@ -28,11 +27,6 @@ class EncoderMotor():
           `enc_pin2` (pin): Pin B for encoder (Default=None).
           `pulse_frequency` (int): Frequency of the motor pulse, in Hz (Default=20000).
         """
-
-        # Enable the driver's standby pin
-        self.standby = digitalio.DigitalInOut(standby_pin)
-        self.standby.direction = digitalio.Direction.OUTPUT
-        self.standby.value = True  # Take driver out of standby mode
 
         # Setup motor outputs
         self.pwm_a = pwmio.PWMOut(pwm_in1, frequency=pulse_frequency)
