@@ -13,7 +13,8 @@ class EncoderMotor():
     def __init__(self, pwm_gate,
                  pwm_in1, pwm_in2,
                  enc_pin1=None, enc_pin2=None,
-                 pulse_frequency=20000):
+                 pulse_frequency=20000,
+                 gear_ratio=20):
         """
         Initialises an EncoderMotor object. 
 
@@ -26,7 +27,9 @@ class EncoderMotor():
           `enc_pin1` (pin): Pin A for encoder (Default=None).
           `enc_pin2` (pin): Pin B for encoder (Default=None).
           `pulse_frequency` (int): Frequency of the motor pulse, in Hz (Default=20000).
+          `gear_ratio` (int): The external gear ratio of the motor
         """
+        self.gear_ratio = gear_ratio
 
         # Setup motor outputs
         self.pwm_a = pwmio.PWMOut(pwm_in1, frequency=pulse_frequency)
@@ -88,6 +91,12 @@ class EncoderMotor():
             return self.encoder.position
         else:
             return None
+
+    def get_counts_per_rotation(self):
+        """
+        Returns the number of encoder counts per rotation of the motor's output shaft.
+        """
+        return 12 * self.gear_ratio
 
     def __str__(self):
         """
