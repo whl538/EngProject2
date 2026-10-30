@@ -6,7 +6,7 @@ import busio
 import adafruit_icm20x
 
 # --- CONFIGURATION ---
-FILTER_WINDOW = 20  # Number of readings for measurements to smooth out noise (higher = smoother, more lag)
+FILTER_WINDOW = 5  # Number of readings for measurements to smooth out noise (higher = smoother, more lag)
 
 class IMU():
     def __init__(self, scl_pin=None, sda_pin=None,
@@ -24,6 +24,13 @@ class IMU():
         # Initialise the IMU
         self.i2c = busio.I2C(scl=scl_pin, sda=sda_pin)
         self.icm = adafruit_icm20x.ICM20948(self.i2c)
+
+        # --- Filter Tuning Constants ---
+        self.alpha = 0.40  # Smoothing factor (0.01 to 1.0). Lower = smoother, but adds tiny lag.
+
+        # --- Filter Memory Buffers ---
+        self.filtered_mx = None
+        self.filtered_my = None
 
         # --- Mesaured Parameters ---
         self.heading_buffer = []
@@ -47,19 +54,27 @@ class IMU():
         Returns ax, ay, az, mx, my, mz
         """
         ax, ay, az = self.icm.acceleration
-        mx, my, mz = self.icm.magnetic
+        raw_mx, raw_my, raw_mz = self.icm.magnetic
+
+        mx = (raw_mx - self.offset_x) * self.scale_x
+        my = (raw_my - self.offset_y) * self.scale_y
+        mz = raw_mz - self.offset_z
 
         my = -my
         mz = -mz
 
-        mx -= self.offset_x
-        my -= self.offset_y
-        mz -= self.offset_z
+        # Exponential Moving-Average Low Pass Filter
+        if self.filtered_mx is None:
+            # Seed the filter on the very first frame
+            self.filtered_mx = mx
+            self.filtered_my = my
+        else:
+            # Smooth out spikes: New value weighs 15%, old history retains 85%
+            self.filtered_mx = (self.alpha * mx) + ((1.0 - self.alpha) * self.filtered_mx)
+            self.filtered_my = (self.alpha * my) + ((1.0 - self.alpha) * self.filtered_my)
 
-        mx *= self.scale_x
-        my *= self.scale_y
 
-        return ax, ay, az, mx, my, mz
+        return ax, ay, az, self.filtered_mx, self.filtered_my, mz
 
     def calculate_tilt_compensated_heading(self):
         """
@@ -162,12 +177,12 @@ class IMU():
                 break
 
             try:
-                ax, ay, az, mx, my, mz = self.read_raw_sensor_data()
+                mx, my, mz = self.icm.magnetic
                 x_max = max(x_max, mx)
                 x_min = min(x_min, mx)
                 y_max = max(y_max, my)
                 y_min = min(y_min, my)
-                time.sleep(0.05)
+                time.sleep(0.02)
             except Exception as e:
                 print(e)
 
@@ -178,20 +193,22 @@ class IMU():
         # Get raw heading
         raw_heading = self.calculate_tilt_compensated_heading()
 
-        # Smooth out readings
-        smooth_raw = self.get_smoothed_heading(raw_heading)
+        relative_heading = raw_heading - self.heading_offset
 
-        tared_heading = smooth_raw - self.heading_offset
-        tared_heading %= 360.0
+        relative_heading %= 360.0
+
+
+        # Smooth out readings
+        smooth_tared_heading = self.get_smoothed_heading(relative_heading)
 
         # Apply deadzone
-        diff = abs(tared_heading - self.previous_heading)
+        diff = abs(smooth_tared_heading - self.previous_heading)
         if diff > 180:
             diff = 360 - diff
 
         if diff >= self.deadzone:
-            self.previous_heading = tared_heading
-            print(f"Stable Tared Heading: {tared_heading}°")
+            self.previous_heading = smooth_tared_heading
+            print(f"Stable Tared Heading: {smooth_tared_heading}°")
 
         return self.previous_heading  # Return previous_heading, since it will be updated if appropriate.
 

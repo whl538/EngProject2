@@ -1,11 +1,8 @@
 import time
-import math
 import sys
 
 import board
-import busio
 import digitalio
-import adafruit_icm20x
 
 sys.path.append("./devices")
 
@@ -16,13 +13,24 @@ IMU_SCL_PIN = board.GP5
 IMU_SDA_PIN = board.GP4
 BUTTON_PIN = board.GP14
 
+CALIBRATE = False
+
+OFFSET_X = 13.725
+OFFSET_Y = -0.15000536
+OFFSET_Z = 0.0000
+SCALE_X = 1.0234
+SCALE_Y = 0.9776
+
 if __name__ == "__main__":
-    imu = IMU(scl_pin=IMU_SCL_PIN, sda_pin=IMU_SDA_PIN)
+    imu = IMU(scl_pin=IMU_SCL_PIN, sda_pin=IMU_SDA_PIN,
+    offset_x=OFFSET_X, offset_y=OFFSET_Y, offset_z=OFFSET_Z,
+    scale_x=SCALE_X, scale_y=SCALE_Y)
 
     button = digitalio.DigitalInOut(BUTTON_PIN)
     button.switch_to_input(pull=digitalio.Pull.DOWN)
 
-    imu.calibrate(button)
+    if CALIBRATE:
+        imu.calibrate(button)
 
     imu.initialise_and_tare()
     while True:
@@ -36,4 +44,4 @@ if __name__ == "__main__":
             print(f"{e}\nExiting loop...")
             break
 
-        time.sleep(0.1)
+        time.sleep(0.01)
