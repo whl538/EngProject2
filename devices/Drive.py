@@ -16,7 +16,7 @@ class Drive():
           `wheel_radius` (float): The radius of the wheels in mm.
           `left_motor` (EncoderMotor): The EncoderMotor located on the drive's left side.
           `right_motor` (EncoderMotor): The EncoderMotor located on the drive's right side.
-        
+
         Optional Parameters:
           `imu` (IMU): The IMU object (Default=None).
           `tof_left` (TOF): The Time-Of-Flight sensor on the left of the drive (Default=None).
@@ -167,7 +167,7 @@ class Drive():
         encoder_value = self.reference_motor.get_encoder_value()
 
         target *= -1
-    
+
         while (encoder_value < target + break_threshold) or (encoder_value > target - break_threshold) or (self.reference_motor.get_speed() != 0.0):
             error = abs(target - encoder_value)
             derivative = error - prev_error
@@ -176,7 +176,7 @@ class Drive():
                 integral = 0
             else:
                 integral += error
-    
+
             self.backward(error * self.kp_straight + integral * self.ki_straight + derivative * self.kd_straight)
             encoder_value = self.reference_motor.get_encoder_value()
 
@@ -251,5 +251,5 @@ class Drive():
             tof_info_r = f"\tRight: {self.tof_right.get_reading()}\n"
         else:
             tof_info_r = "\tNo Right TOF\n"
-        
+
         return motor_info + imu_info + tof_info + tof_info_l + tof_info_c + tof_info_r
