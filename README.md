@@ -8,11 +8,10 @@ This project works with our custom-designed robot to complete the IEEE Micromous
 - Eddie Spencer
 
 # Instructions
-Upload all files to a Pi Pico 2W Board with [CircuitPython 10.x](https://circuitpython.org/board/raspberry_pi_pico2_w/) pre-installed. Replace any files and folders currently on the device.
-The Board will automatically search for `code.py` and run whatever code it finds in the file. It will NOT run any other file.
+Upload all files to a Pi Pico 2W Board with [MicroPython 1.29.x](https://micropython.org/download/RPI_PICO2_W/) pre-installed. Replace any files and folders currently on the device.
 
 # Dependencies
-- 1x Pi Pico 2W Board with [CircuitPython 10.x](https://circuitpython.org/board/raspberry_pi_pico2_w/) installed.
+- 1x Pi Pico 2W Board with [MicroPython 1.29.x](https://micropython.org/download/RPI_PICO2_W/) installed.
 - 2x Micro Metal Gear Motor
 - 1 Motor Driver
 
